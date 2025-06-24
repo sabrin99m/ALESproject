@@ -89,9 +89,9 @@ sigma_e = sqrt(mean(y_noiseless.^2));  % power of the a priori error signal
 
 lambda_n = ones(N, 1) * lambda_max;    % Variable Forgetting Factor initialization
 
-for i = 2:N
+for i = L:N
     e = y(i) - u(i,:)*theta_vff(:,i-1);                            % A priori error
-    K = (P * u(i,:)') / (lambda_n(i-1) + u(i,:) * P * u(i,:)');  % Kalman gain vector
+    K = (P * u(i,:)') / (lambda_n(i-1) + u(i,:) * P * u(i,:)');    % Kalman gain vector
     theta_vff(:,i) = theta_vff(:,i-1) + K*e;
     q_n = u(i,:) * P *u(i,:)';
     P = (1/lambda_n(i))*(P - K*u(i,:)*P);
@@ -218,14 +218,30 @@ var_theta2_vff = var(theta_vff(:,2));
 %     settling_time_vff2 = NaN;
 % end
 
-% --- Misalignment ---
-theta_true = [theta1_true, theta2_true];
+% --- Misalignment (tempo per tempo) ---
+misalign_rls = zeros(N,1);
+misalign_vff = zeros(N,1);
 
-misalign_rls = 10*log10(sum((theta_rls - theta_true).^2) ./ sum(theta_true.^2));
-misalign_vff = 10*log10(sum((theta_vff - theta_true).^2) ./ sum(theta_true.^2));
+for i = L:N
+    theta_true = [theta1_true(i), theta2_true(i)];
+    misalign_rls(i) = 10*log10(norm(theta_rls(i,:) - theta_true)^2 / norm(theta_true)^2);
+    misalign_vff(i) = 10*log10(norm(theta_vff(i,:) - theta_true)^2 / norm(theta_true)^2);
+end
 
-avg_misalign_rls = mean(misalign_rls);
-avg_misalign_vff = mean(misalign_vff);
+% --- Plot del misalignment ---
+figure;
+plot(L:N, misalign_rls(L:N), 'b', 'DisplayName', 'Plain RLS');
+hold on;
+plot(L:N, misalign_vff(L:N), 'r', 'DisplayName', 'VFF-RLS');
+xlabel('Tempo [campioni]');
+ylabel('Misalignment [dB]');
+legend;
+title('Misalignment vs tempo');
+grid on;
+
+% Misalignment medio (media temporale)
+avg_misalign_rls = mean(misalign_rls(L:N));  % Ignora primi L-1
+avg_misalign_vff = mean(misalign_vff(L:N));
 
 
 % --- Print results ---
@@ -243,14 +259,6 @@ fprintf('Avg Misalignment(dB) | RLS: %.2f dB | VFF-RLS: %.2f dB\n', avg_misalign
 % fprintf('      VFF-RLS: %d steps\n', settling_time_vff2);
 
 
-figure;
-plot(misalign_rls, 'b'); hold on;
-plot(misalign_vff, 'r');
-legend('RLS', 'VFF-RLS');
-xlabel('Time step'); ylabel('Misalignment (dB)');
-title('Misalignment over Time');
-grid on;
-
 
 % Table creation
 algorithms = {'RLS'; 'VFF-RLS'};
@@ -265,3 +273,5 @@ T = table(MSE_theta1, MSE_theta2, Variance_theta1, Variance_theta2, Misalignment
           'RowNames', algorithms);
 T = rows2vars(T);
 writetable(T, 'comparison_results.csv', 'WriteRowNames', true);
+
+
