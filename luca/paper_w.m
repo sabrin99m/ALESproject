@@ -6,10 +6,10 @@ close all
 rng('default');
 
 %% PARAMETERS
-SNR = 20;                              % dB, snr = sigma_d^2/sigma_v^2;
-P_delta = 10^6; 
 N = 45000;
 L=64;
+SNR = ones(N,1)*20;                              % dB, snr = sigma_d^2/sigma_v^2;
+P_delta = 10^6; 
 lambda_rls = 1-(1/(3*L));
 
 %% SYSTEM
