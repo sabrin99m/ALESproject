@@ -74,11 +74,6 @@ end
 
 theta_rls = theta_rls';
 
-y_hat1 = zeros(N,1);
-
-for i = L:N
-    y_hat1(i) = U(i,:) * theta_rls(i-1,:)';
-end
 
 % GVFF
 %___________________
@@ -127,33 +122,14 @@ end
 
 theta_vff = theta_vff';
 
-y_hat2 = zeros(N,1);
-
-for i = L:N
-    y_hat2(i) = U(i,:) * theta_vff(i-1,:)';
-end
-
-
-% Plot results
+% Evoluzione di lamnda nel tempo
 figure
-title('Plain RLS vs. VFF-RLS')
-t = L:N;    % temporal line for plot
-
-subplot(1,2,1)
-plot(t,d(L:N))
-hold on 
-plot(t, y_hat1(L:N))
-xlabel('time stamp')
-ylabel('output')
-legend('true system', 'estimated system (RLS)')
-
-subplot(1,2,2)
-plot(t,d(L:N))
-hold on 
-plot(t, y_hat2(L:N))
-xlabel('time stamp')
-ylabel('output')
-legend('true system', 'estimated system (VFF)')
+plot(L:N, lambda_n(L:N), 'r', 'DisplayName', 'VFF-RLS')
+xlabel('Tempo [campioni]');
+ylabel('lambda(n)');
+legend;
+title('Evoluzione di lambda(n)');
+grid on;
 
 % Prealloca vettori per misalignment
 misalignment_rls = zeros(N,1);
