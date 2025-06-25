@@ -10,7 +10,7 @@ SNR = 20;                              % dB, snr = sigma_d^2/sigma_v^2;
 
 
 % Generate input signal (gaussian white noise)
-sigma_u = 100;
+sigma_u = 1;
 u = sigma_u*randn(N,1);
 
 U = zeros(N, L);
