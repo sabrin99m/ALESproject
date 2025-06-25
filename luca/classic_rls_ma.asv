@@ -1,4 +1,4 @@
-function [theta_hist] = classic_rls_ma(u,y,delta,lambda)
+function [theta_hist] = classic_rls_ma(u,d,delta,lambda)
 % x[N,1]
 % P[L,L]
 [N,kb] = size(u);
@@ -13,7 +13,7 @@ for n = 1:N
     P = (1/lambda)*(P - (1/beta) * P * (phi * phi') * P);
     k = P*phi;
     y_est(n) = phi'*theta_est;
-    error = y(n) - phi'*theta_est;
+    error = d(n) - phi'*theta_est;
     theta_est = theta_est + k*error;
     
 

@@ -1,4 +1,4 @@
-function [w_hist, lambda_hist] = gvff_rls(x, d, delta)
+function [w_hist, lambda_hist] = gvff_rls(u, y, delta)
 % x: vettore colonna (N x 1), segnale di input
 % L: ordine del filtro
 % d: vettore colonna (N x 1), segnale desiderato
@@ -7,7 +7,7 @@ function [w_hist, lambda_hist] = gvff_rls(x, d, delta)
 % lambda0: valore iniziale forgetting factor
 % lambda_min, lambda_max: limiti di lambda
 
-[N,L] = size(x);
+[N,L] = size(u);
 w = zeros(L, 1);              % pesi iniziali
 P = delta * eye(L);           % matrice di correlazione inversa
 z = zeros(L, 1); 
@@ -21,26 +21,26 @@ w_hist = zeros(N,L);
 lambda_hist = zeros(N, 1);
 
 for n = 1:N
-    xn = x(n,:)';          % vettore colonna (L x 1)
-    dn = d(n);                % segnale desiderato
+    xn = u(n,:)';          % vettore colonna (L x 1)
+    dn = y(n);                % segnale desiderato
 
     % Errore
-    e = dn - w' * xn;
+    error = dn - w' * xn;
 
     % Guadagno
     k = (P * xn) / (lambda + xn' * P * xn);
 
     % Aggiorna pesi
-    w = w + k * e;
+    w = w + k * error;
 
     % Aggiorna matrice P
     P = (P - k * xn' * P) / lambda;
 
     % Derivata ricorsiva z
-    z = z + k * (e - xn' * z);
+    z = z + k * (error - xn' * z);
 
     % Gradiente
-    gradJ = -e * (xn' * z);   % scalare
+    gradJ = - error * (xn' * z);   % scalare
 
     % Aggiorna lambda
     lambda = lambda - mu * gradJ;
