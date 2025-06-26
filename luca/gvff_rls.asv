@@ -11,6 +11,7 @@ function [w_hist, lambda_hist] = gvff_rls(u, y, delta, K_alpha, K_beta)
 w = zeros(L, 1);              % pesi iniziali
 P = delta * eye(L);           % matrice di correlazione inversa
 mu = 0.1;
+lambda_min = 0.4;
 lambda_max = 0.999999;
 lambda = lambda_max;
 rho = 0;
@@ -42,14 +43,10 @@ for n = 1:N
     P = (P - k * xn' * P) / lambda;
     
     % Grad
-
     rho = 1 + lambda*rho;
     rho_partial = rho;
     rho_tilde = 1 + lambda^2*rho_tilde;
     rho_tilde_partial = 2*lambda*rho_tilde;
-
-    D = (N - 2)^2*rho^2  - 8*(N+2)*((N+1)*rho_tilde + rho^2);
-    lambda_min = ((N - 2)*rho + sqrt(D)) / (4*((N+1)*rho_tilde + rho^2));
 
     sigma2_e = alpha*sigma_e^2 + (1-alpha)*error^2;
     sigma_e = sqrt(sigma2_e);
@@ -68,7 +65,7 @@ for n = 1:N
 
     % Aggiorna lambda
     lambda = lambda - (mu * sigma2_e_partial / (1 - lambda));
-    lambda = max(2*lambda_min, min(lambda_max, lambda));
+    lambda = max(lambda_min, min(lambda_max, lambda));
 
     % Salva
     w_hist(n,:) = w;

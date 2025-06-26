@@ -7,7 +7,8 @@ P = eye(L) * delta;        % Inverse of the input auto-correlation matrix
 xi = 10^-8;                            % Small constant to avoid division per zero in forgetting factor updates
 lambda_max = 0.999999;  
 lambda = lambda_max;    % Variable Forgetting Factor 
-
+rho = zeros(L,1);
+rho_tilde = ;
 
 
 

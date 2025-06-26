@@ -21,9 +21,9 @@ y = ma_realizations(h,x,e);
 d = ma_realizations(h,x,zeros(N,1));
 
 %% RLS
-[h_classic,mis_classic] = normal_rls_procedure(x,d,h,P_delta,lambda_rls);
-[h_vff, lambda_vff, mis_vff] = vff_rls_procedure(x,d,d,h,P_delta,6,18);
-[h_gvff, lambda_gvff, mis_gvff] = gvff_rls_procedure(x,d,h,P_delta);
+[h_classic,mis_classic] = normal_rls_procedure(x,y,h,P_delta,lambda_rls);
+[h_vff, lambda_vff, mis_vff] = vff_rls_procedure(x,y,d,h,P_delta,6,18);
+[h_gvff, lambda_gvff, mis_gvff] = gvff_rls_procedure(x,y,h,P_delta);
 
 %% PLOTS
 plot_mis_and_lambda(mis_classic,mis_vff,mis_gvff,lambda_vff,lambda_gvff)
