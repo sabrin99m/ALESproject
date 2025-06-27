@@ -75,9 +75,34 @@ end
 theta_rls = theta_rls';
 
 
-% GVFF
-%___________________
+%  GVFF
+mu = 0.1;
+P = 10^6*eye(L);
+theta_gvff = zeros(N,L)';
+lambda_min = 0.95;
+lambda_max = 0.999999;                 % Maximum forgetting factor
 
+lambda_gvff = ones(N, 1) * lambda_max;    % Variable Forgetting Factor initialization
+
+for i = L:N
+    phi_i = U(i,:)';
+    e = d(i) - phi_i' * theta_gvff(:,i-1);
+    q_n = phi_i' * P * phi_i;
+    K = (P * phi_i) / (lambda_gvff(i) + q_n);
+    theta_gvff(:,i) = theta_gvff(:,i-1) + K * e;
+    P = (1/lambda_gvff(i)) * (P - K * phi_i' * P);
+
+    % Gradiente approssimato: d e(n)^2 / d lambda
+    dE2_dlambda = e^2 * q_n / (lambda_gvff(n-1) + q_n)^2;
+    
+    % Aggiorna λ con discesa del gradiente
+    lambda_tmp = lambda_gvff(n-1) - mu * dE2_dlambda;
+
+    % Clipping di λ tra lambda_min e lambda_max
+    lambda_gvff(i) = min(max(lambda_tmp, lambda_min), lambda_max);
+end
+
+theta_gvff = theta_gvff';
 
 
 % Variable Forgetting Factor RLS 
@@ -116,13 +141,15 @@ for i = L:N
     
     sigma2_v = beta*sigma_v^2 + (1-beta)*e^2;
     sigma_v = sqrt(sigma2_v);
-
+    if sigma_e <= gamma*sigma_v
+        lambda_n(i) = lambda_max;
+    end
     lambda_n(i) = min((sigma_q*sigma_v)/(xi + abs(sigma_e - sigma_v)), lambda_max);
 end
 
 theta_vff = theta_vff';
 
-% Evoluzione di lamnda nel tempo
+% Evoluzione di lambda nel tempo
 figure
 plot(L:N, lambda_n(L:N), 'r', 'DisplayName', 'VFF-RLS')
 xlabel('Tempo [campioni]');
@@ -133,6 +160,7 @@ grid on;
 
 % Prealloca vettori per misalignment
 misalignment_rls = zeros(N,1);
+misalignment_gvff = zeros(N,1);
 misalignment_vff = zeros(N,1);
 
 for n = L:N
@@ -151,6 +179,10 @@ for n = L:N
     misalignment_rls(n) = 10 * log10(err_rls / norm(h_shift)^2);
 
     % Calcola misalignment VFF-RLS
+    err_gvff = norm(theta_gvff(n,:) - h_shift)^2;
+    misalignment_gvff(n) = 10 * log10(err_gvff / norm(h_shift)^2);
+
+    % Calcola misalignment VFF-RLS
     err_vff = norm(theta_vff(n,:) - h_shift)^2;
     misalignment_vff(n) = 10 * log10(err_vff / norm(h_shift)^2);
 end
@@ -158,6 +190,8 @@ end
 % Plotta
 figure;
 plot(L:N, misalignment_rls(L:N), 'b', 'DisplayName', 'Plain RLS');
+hold on;
+plot(L:N, misalignment_gvff(L:N), 'k', 'DisplayName', 'GVFF-RLS');
 hold on;
 plot(L:N, misalignment_vff(L:N), 'r', 'DisplayName', 'VFF-RLS');
 xlabel('Tempo [campioni]');
