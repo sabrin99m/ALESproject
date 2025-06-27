@@ -35,19 +35,17 @@ for n = 1:N
     
     % Grad
 
-    D = (L - 2)^2 * rho^2  - 8 * (L+2) * ((L+1) * rho_tilde + rho^2);
-    if(D>0)
-        lambda_min = ((L - 2) * rho + sqrt(D)) / (4 * ((L+1) * rho_tilde + rho^2));
-    else
-        lambda_min = 0;
-    end
-
     rho = 1 + lambda*rho;
     rho_partial = rho;
     rho_tilde = 1 + lambda^2*rho_tilde;
     rho_tilde_partial = 2*lambda*rho_tilde;
 
-
+    D = (N - 2)^2 * rho^2  - 8 * (N+2) * ((N+1) * rho_tilde + rho^2);
+    if(D>0)
+        lambda_min = ((N - 2) * rho + sqrt(D)) / (4 * ((N+1) * rho_tilde + rho^2));
+    else
+        lambda_min = 0;
+    end
 
 
 
@@ -56,10 +54,10 @@ for n = 1:N
     sigma2_v = beta*sigma_v^2 + (1-beta) * error^2;
     sigma_v = sqrt(sigma2_v);
 
-    zeta = 1 - ((2*((L + 1)*rho_tilde + rho^2) - (L + 2)*rho)/(rho*((L+1)*rho_tilde+rho^2)));
+    zeta = 1 - ((2*((N + 1)*rho_tilde + rho^2) - (N + 2)*rho)/(rho*((N+1)*rho_tilde+rho^2)));
     temp1 = 2/rho^2*rho_partial;
-    temp2 = ((L + 1)*rho_tilde + rho^2)^2;
-    temp3 = ((L + 1)* rho_tilde_partial + 2*rho*rho_partial);
+    temp2 = ((N + 1)*rho_tilde + rho^2)^2;
+    temp3 = ((N + 1)* rho_tilde_partial + 2*rho*rho_partial);
 
     zeta_partial = temp1 - ((N + 2) /temp2 * temp3);
     h_partial = temp1 - (2 /temp2 * temp3);

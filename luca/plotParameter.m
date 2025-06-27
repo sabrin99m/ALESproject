@@ -1,9 +1,12 @@
-function plotParameter(idx,real,est)
+function plotParameter(idx,real,est_classic,est_vff,est_gvff)
 figure;
-plot(est(:,idx), 'b', 'DisplayName', 'h'+string(idx)+'_est');
+plot(real(:,idx), 'Color','black', 'DisplayName', 'Theta '+string(idx)+' Real');
 hold on;
-plot(real(:,idx), 'g', 'DisplayName', 'h'+string(idx)+'_real','LineStyle','--');
-legend('Estimated', 'Real', 'Location', 'best');
-title("Normal RLS h"+string(idx)+" estimations")
-%ylim([-2,2])
+plot(est_classic(:,idx), 'b', 'DisplayName', 'Theta '+string(idx)+' Classic RLS');
+plot(est_vff(:,idx), 'r', 'DisplayName', 'Theta '+string(idx)+' VFF')
+plot(est_gvff(:,idx), 'g', 'DisplayName', 'Theta '+string(idx)+' GVFF')
+legend;
+title("RLS h"+string(idx)+" estimations")
+grid on
+ylim([-2,2])
 end

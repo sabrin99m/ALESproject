@@ -1,31 +1,23 @@
-function [h_hist] = classic_rls_ma(x,d,delta,lambda)
+function [theta_hist] = classic_rls_ma(u,y,delta,lambda)
 % x[N,1]
 % P[L,L]
-[N,kb] = size(x);
+[N,kb] = size(u);
 P = delta * eye(kb);
-h_est = zeros(kb, 1); 
+theta_est = zeros(kb, 1); 
 % Classic RLS
-h_hist = zeros(N,kb);
+theta_hist = zeros(N,kb);
 y_est = zeros(N,1);
-beta_hist = zeros(N,1);
-P_hist = zeros(N,kb,kb);
 for n = 1:N
-    x_n = x(n,:)';
-    beta = lambda + x_n'*P*x_n;
-    P = (1/lambda)*(P - (1/beta) * P * (x_n * x_n') * P);
-    k_n = P*x_n;
-    y_est(n) = x_n'*h_est;
-    e_n = d(n) - x_n'*h_est;
-    h_est = h_est + k_n*e_n;
-    h_hist(n,:) = h_est.';
-    beta_hist(n,:) = beta;
-    P_hist(n,:,:) = P;
+    phi = u(n,:)';
+    beta = lambda + phi'*P*phi;
+    P = (1/lambda)*(P - (1/beta) * P * (phi * phi') * P);
+    k = P*phi;
+    y_est(n) = phi'*theta_est;
+    error = y(n) - phi'*theta_est;
+    theta_est = theta_est + k*error;
+    
+
+    theta_hist(n,:) = theta_est.';
 end
-
-figure
-plot(beta_hist)
-figure
-plot(P_hist(:,1,1))
-
 end
 
