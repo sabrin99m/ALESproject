@@ -13,33 +13,34 @@ P = delta * eye(L);           % matrice di correlazione inversa
 mu = 0.1;
 lambda_max = 0.999999;
 lambda = lambda_max;
-rho = 0;
-rho_tilde = 0;
+rho = 1;
+rho_tilde = 1;
 sigma_e = 0;  % power of the a priori error signal
 sigma_v = 0;
 sigma2_e_partial = 0;
 
-alpha = 1 - 1/(K_alpha*L);
-beta = 1 - 1/(K_beta*L);
+alpha = 1 - (1/(K_alpha*L));
+beta = 1 - (1/(K_beta*L));
 
 w_hist = zeros(N,L);
 lambda_hist = zeros(N, 1);
-lambda_min_hist = zeros(N, 1);
+history = zeros(N, 1);
 
 for n = 1:N
     phi_n = u(n,:)';          % vettore colonna (L x 1)
     dn = y(n);                % segnale desiderato
 
-        % Errore
+    % Errore
     error = dn - theta' * phi_n;
     
     % Grad
 
     D = (L - 2)^2 * rho^2  - 8 * (L+2) * ((L+1) * rho_tilde + rho^2);
+
     if(D>0)
         lambda_min = ((L - 2) * rho + sqrt(D)) / (4 * ((L+1) * rho_tilde + rho^2));
     else
-        lambda_min = 0;
+        lambda_min = 0.000001;
     end
 
     rho = 1 + lambda*rho;
@@ -47,21 +48,17 @@ for n = 1:N
     rho_tilde = 1 + lambda^2*rho_tilde;
     rho_tilde_partial = 2*lambda*rho_tilde;
 
-
-
-
-
     sigma2_e = alpha*sigma_e^2 + (1-alpha) * error^2;
     sigma_e = sqrt(sigma2_e);
     sigma2_v = beta*sigma_v^2 + (1-beta) * error^2;
     sigma_v = sqrt(sigma2_v);
 
     zeta = 1 - ((2*((L + 1)*rho_tilde + rho^2) - (L + 2)*rho)/(rho*((L+1)*rho_tilde+rho^2)));
-    temp1 = 2/rho^2*rho_partial;
+    temp1 = 2*rho_partial/rho^2;
     temp2 = ((L + 1)*rho_tilde + rho^2)^2;
     temp3 = ((L + 1)* rho_tilde_partial + 2*rho*rho_partial);
 
-    zeta_partial = temp1 - ((N + 2) /temp2 * temp3);
+    zeta_partial = temp1 - ((L + 2) /temp2 * temp3);
     h_partial = temp1 - (2 /temp2 * temp3);
 
     sigma2_e_partial = zeta*sigma2_e_partial + zeta_partial*sigma2_e + h_partial*sigma2_v;
@@ -81,9 +78,9 @@ for n = 1:N
     P = (P - k * phi_n' * P) / lambda;
 
     % Salva
-    lambda_min_hist(n) = theta' * phi_n;
+    history(n) = zeta;
     w_hist(n,:) = theta;
     lambda_hist(n) = lambda;
 end
-plot(lambda_min_hist)
+plot(history)
 end
