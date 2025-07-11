@@ -1,4 +1,4 @@
-function [w_est, omega_hist] = gvff_rls(u, y, delta, K_alpha, K_beta, mu_omega, omega_max)
+function [w_est, omega_hist] = gvff_rls(u, y, delta, K_alpha, K_beta)
 %GVFF_RLS_DYNAMIC Implementa l'algoritmo GVFF-RLS con limite inferiore di omega dinamico.
 %
 %   RIFERIMENTO:
